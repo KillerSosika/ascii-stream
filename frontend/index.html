@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Stream WebSocket</title>
+</head>
+<body>
+    <h1>ASCII Stream WebSocket Test</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <pre id="ascii"></pre>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const ascii = document.getElementById("ascii");
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error("Error accessing camera:", error);
+            });
+
+        const socket = new WebSocket("ws://localhost:8080");
+
+        socket.onmessage = function(event) {
+            ascii.textContent = event.data; 
+        };
+
+        function sendFrame() {
+            if (socket.readyState === WebSocket.OPEN) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob(blob => {
+                    blob.arrayBuffer().then(buffer => {
+                        socket.send(buffer);
+                    });
+                }, "image/jpeg");
+            }
+            requestAnimationFrame(sendFrame);
+        }
+
+        video.addEventListener("play", sendFrame);
+    </script>
+</body>
+</html>

@@ -1,4 +1,0 @@
-body { font-family: monospace; background: black; color: white; text-align: center; }
-#container { display: flex; justify-content: center; gap: 20px; }
-pre { font-size: 8px; line-height: 8px; }
-video { display: block; width: 320px; border: 2px solid white; }
